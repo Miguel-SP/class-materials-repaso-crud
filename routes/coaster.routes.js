@@ -48,9 +48,12 @@ router.get('/delete/:id', (req, res) => {
 
 
 router.get('/edit/:id', (req, res) => {
-    Coaster.findById(req.params.id)
-    .populate('park')
-    .then(theCoaster => res.render('coasters/coaster-edit', theCoaster))
+
+    const coasterPromise = Coaster.findById(req.params.id)
+    const parkPromise = Park.find()
+
+    Promise.all([coasterPromise, parkPromise])
+    .then(results => res.render('coasters/coaster-edit', { coaster: results[0], parks: results[1] }))
     .catch(err => console.log('Error editando montaña rusa', err))
     
 })
@@ -60,7 +63,7 @@ router.post('/edit/:id', (req, res) => {
     const { name, description, inversions, length, park } = req.body
 
     Coaster.findByIdAndUpdate(req.params.id, req.body)
-    .then(()=> res.redirect('/coasters'))
+    .then(()=> res.redirect(`/coasters/${req.params.id}`))
     .catch(err => console.log('Error editando montaña rusa', err))
     
 })
